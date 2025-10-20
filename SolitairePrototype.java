@@ -1,3 +1,5 @@
+package com.example.solitaireprototype;
+
 //*********************************************
 // Solitaire Prototype 1 -- GUI Components
 //
@@ -23,6 +25,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 // GUI-only
 // Class for the user interface layout (no game logic)
@@ -52,7 +57,7 @@ public class SolitairePrototype extends Application {
         // Main layout
         BorderPane root = new BorderPane();
         root.setTop(top);
-        root.setCenter(board);
+        root.setCenter(board); // insert pane
         root.setBottom(status);
 
         // Scene setup
@@ -82,6 +87,26 @@ public class SolitairePrototype extends Application {
                 new MenuItem("Exit")
         );
 
+    /*// Set up the menu bar
+    MenuBar menuBar = new MenuBar();
+
+    // Set up menu bar headers
+    Menu gameMenu = new Menu("Game");
+    MenuItem newGameItem = new MenuItem("New game");
+    MenuItem resetItem = new MenuItem("Reset");
+    MenuItem sepItem = new SeparatorMenuItem();
+    MenuItem exitItem = new MenuItem("Exit");
+
+    gameMenu.getItems().addAll(newGameItem, resetItem, sepItem, exitItem);
+
+    menuBar.getMenus().add(gameMenu);
+
+        // Event Listener for Game MenuItem "Exit"
+        exitItem.setOnMouseReleased(e ->
+        {
+            // CODE FOR DEAL BUTTON HERE
+        });*/
+
         Menu mView = new Menu("View");
         mView.getItems().add(new CheckMenuItem("Show Hints"));
 
@@ -98,7 +123,31 @@ public class SolitairePrototype extends Application {
         Button btnUndo = new Button("Undo");
         Button btnExit = new Button("Exit");
 
-        // Teammates can add logic to this section later
+        //**** EVENT LISTENERS ****//
+
+        // Event Listener for New button
+        btnNew.setOnMouseReleased(e ->
+                {
+                    // CODE FOR NEW BUTTON HERE
+                });
+
+        // Event Listener for Deal button
+        btnDeal.setOnMouseReleased(e ->
+        {
+            // CODE FOR DEAL BUTTON HERE
+        });
+
+        // Event Listener for Undo button
+        btnUndo.setOnMouseReleased(e ->
+        {
+            // CODE FOR UNDO BUTTON HERE
+        });
+
+        // Event Listener for Exit button
+        btnExit.setOnMouseReleased(e ->
+        {
+            System.exit(0);
+        });
 
         cboVariant.setPrefWidth(160);
 
