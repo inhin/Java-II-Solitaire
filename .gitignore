@@ -1,0 +1,27 @@
+# IntelliJ / IDE
+.idea/
+*.iml
+out/
+
+# Build outputs
+target/
+build/
+bin/
+dist/
+
+# Java
+*.class
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+*.swp
+
+# JavaFX SDKs
+javafx-sdk*/
+openjfx*/
+lib/javafx*/
