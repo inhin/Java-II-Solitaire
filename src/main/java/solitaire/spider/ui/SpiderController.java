@@ -5,7 +5,7 @@
 // Author: Indy Hinton
 // Course: CPT-237-W38 Java Programming II
 // Semester: Fall 2025
-// Dates: 10/22/2025–11/2/2025
+// Dates: 10/22/2025–11/9/2025
 //
 // Description:
 // Bridge between the game engine and user interface
@@ -33,38 +33,38 @@ public class SpiderController {
     private final SpiderGame game = new SpiderGame();
     private final List<PileView> pileViews = new ArrayList<>();
     private final List<FoundationView> foundationViews = new ArrayList<>();
-    private StackPane boardRoot;          // layered root (board + overlay)
-    private final Pane overlay = new Pane(); // animation layer
+    private final List<StockView> stockViews = new ArrayList<>();
+    private final Pane overlay = new Pane();
+    private StackPane boardRoot;
     private boolean animating = false;
 
     public javafx.scene.Node createSpiderBoard() {
         pileViews.clear();
         foundationViews.clear();
+        stockViews.clear();
         overlay.setMouseTransparent(true);
 
-        game.newGame(); // sets up deck + tableau
+        game.newGame();
 
-        // Build the base board (foundation + tableau)
+        // Build the base board
         // Stack overlay on top for animations
-        Pane board = SpiderBoardFactory.build(game, pileViews, foundationViews);
+        Pane board = SpiderBoardFactory.build(game, pileViews, foundationViews, stockViews);
         boardRoot = new StackPane(board, overlay);
+        boardRoot.setStyle("-fx-background-color: transparent;");
 
-        // Add scroll bars (temporary fix)
-        ScrollPane scrollPane = new ScrollPane(boardRoot);
-        scrollPane.setFitToWidth(false);     // Horizontal scroll
-        scrollPane.setFitToHeight(false);    // Vertical scroll
-        scrollPane.setPannable(true);        // Drag to scroll
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setStyle("""
-        -fx-background: linear-gradient(to bottom, #c9d6e3, #edf2f7);
-        -fx-border-color: #b0b0b0;
-    """);
+        // Add scroll bars
+        // Temporary solution until flexible is solved
+        // Updated 11-9-25 to green "felt" background
+        ScrollPane sp = new ScrollPane(boardRoot);
+        sp.setFitToWidth(true);
+        sp.setFitToHeight(true);
+        sp.setPannable(true);
+        sp.setStyle("-fx-background: #325b3b; -fx-background-color: #325b3b;");
 
         refreshAll();
         wireClicks();
 
-        return scrollPane;
+        return sp;
     }
 
     public void onNewGame() {
@@ -75,15 +75,10 @@ public class SpiderController {
     public boolean onDeal() {
         boolean ok = game.dealRow();
         if (ok) {
-            for (var pv : pileViews) {
-                FadeTransition ft = new FadeTransition(Duration.millis(160), pv);
-                ft.setFromValue(0.85);
-                ft.setToValue(1.0);
-                ft.play();
-            }
+            game.extractCompletedRuns();
+            refreshAll();
+            if (game.isWin()) showWin();
         }
-        refreshAll();
-        if (game.isWin()) new Alert(Alert.AlertType.INFORMATION, "You win!").showAndWait();
         return ok;
     }
 
@@ -95,11 +90,16 @@ public class SpiderController {
 
     public int getMoveCount() { return game.getMoveCount(); }
     public int getScore()     { return game.getScore(); }
-    public boolean isWin()    { return game.isWin(); }
 
     private void refreshAll() {
         pileViews.forEach(PileView::refresh);
-        foundationViews.forEach(FoundationView::refresh);}
+        foundationViews.forEach(FoundationView::refresh);
+        stockViews.forEach(StockView::refresh);
+    }
+
+    private void showWin() {
+        new Alert(Alert.AlertType.INFORMATION, "You win!").showAndWait();
+    }
 
     // Click-select move wiring
     private Integer selectedFrom = null;
@@ -116,23 +116,23 @@ public class SpiderController {
         if (selectedFrom == null) {
             selectedFrom = idx;
             pileViews.get(idx).setStyle("""
-                -fx-border-color: #f5c542;
+                -fx-background-color: transparent;
+                -fx-border-color: gold;
                 -fx-border-width: 2;
-                -fx-background-insets: 0, 1;
-                -fx-effect: dropshadow(gaussian, rgba(245,197,66,0.6), 10, 0.2, 0, 0);
             """);
             return;
         }
 
+        // Updated setStyle to show green background after moving cards
         tryMoveLongestRun(selectedFrom, idx);
-        pileViews.get(selectedFrom).setStyle("-fx-background-color: #f7f7f7; -fx-border-color: #ddd;");
+        pileViews.get(selectedFrom).setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
         selectedFrom = null;
         refreshAll();
-        if (game.isWin()) new Alert(Alert.AlertType.INFORMATION, "You win!").showAndWait();
+        if (game.isWin()) showWin();
     }
 
     private void tryMoveLongestRun(int fromIdx, int toIdx) {
-        if (fromIdx == toIdx || animating) return;
+        if (fromIdx == toIdx) return;
 
         var from = game.tableaux.get(fromIdx);
         int size = from.getCards().size();
@@ -141,8 +141,8 @@ public class SpiderController {
         // Longest face-up, same-suit, descending tail
         int max = 1;
         for (int k = size - 1; k > 0; k--) {
-            var above = from.getCards().get(k);
-            var below = from.getCards().get(k - 1);
+            Card above = from.getCards().get(k);
+            Card below = from.getCards().get(k - 1);
             if (!below.isFaceUp() || !above.isFaceUp()
                     || below.getSuit() != above.getSuit()
                     || below.getRank() != above.getRank() + 1) break;
@@ -151,15 +151,18 @@ public class SpiderController {
 
         for (int c = max; c >= 1; c--) {
             final int moveCount = c;
-            List<Card> cards = new ArrayList<>(from.getCards().subList(size - c, size));
+            List<Card> cards =
+                    new ArrayList<>(from.getCards().subList(size - c, size));
 
             if (game.moveRun(fromIdx, moveCount, toIdx)) {
-                game.undo();
+                game.undo(); // Test
+
                 animateMove(fromIdx, toIdx, cards, () -> {
                     game.moveRun(fromIdx, moveCount, toIdx);
+                    game.extractCompletedRuns();
                     refreshAll();
                     animating = false;
-                    if (game.isWin()) new Alert(Alert.AlertType.INFORMATION, "You win!").showAndWait();
+                    if (game.isWin()) showWin();
                 });
                 return;
             }

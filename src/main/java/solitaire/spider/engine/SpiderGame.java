@@ -146,28 +146,63 @@ public class SpiderGame {
         return true;
     }
 
-    // Check last 13 cards form a run that builds K down to A
+    // Look for a 13 card completed run
+    // Same suit, face up, descending by 1
     // Move it to the first foundation with space
     public void extractCompletedRuns() {
         for (int i = 0; i < TABLEAU_COUNT; i++) {
             Pile t = tableaux.get(i);
-            if (t.getCards().size() < 13) continue;
-            List<Card> tail = t.getCards().subList(t.getCards().size() - 13, t.getCards().size());
+            int size = t.getCards().size();
+            if (size < 13) continue;
+
+            List<Card> cards = t.getCards();
+            int topIdx = size - 1;
+            int start = size - 13;
+
             boolean ok = true;
-            for (int k = 0; k < 12; k++) {
-                Card low = tail.get(k);
-                Card high = tail.get(k + 1);
-                if (low.getSuit() != high.getSuit() || high.getRank() != low.getRank() + 1) { ok = false; break; }
-            }
-            if (ok && tail.get(0).getRank() == 1 && tail.get(12).getRank() == 13) {
-                List<Card> extracted = new ArrayList<>(tail);
-                tail.clear();
-                for (Pile f : foundations) {
-                    if (f.getCards().isEmpty()) { f.addRun(extracted); break; }
+
+            // Check all 13
+            for (int k = start; k < size; k++) {
+                Card c = cards.get(k);
+                if (!c.isFaceUp()) {
+                    ok = false;
+                    break;
                 }
-                undo.push(new Move(Move.Type.EXTRACT_RUN, i, -1, 13, extracted));
-                t.flipTopUpIfNeeded();
+                if (k > start) {
+                    Card prev = cards.get(k - 1);
+                    // Check same suit
+                    if (c.getSuit() != prev.getSuit()) {
+                        ok = false;
+                        break;
+                    }
+                    // Check descending by 1
+                    if (c.getRank() != prev.getRank() - 1) {
+                        ok = false;
+                        break;
+                    }
+                }
             }
+
+            if (!ok) continue;
+
+            // Move 13 cards
+            List<Card> extracted = t.takeTop(13);
+
+            // Put into first empty foundation
+            for (Pile f : foundations) {
+                if (f.getCards().isEmpty()) {
+                    f.addRun(extracted);
+                    break;
+                }
+            }
+
+            t.flipTopUpIfNeeded();
+
+            undo.push(new solitaire.spider.model.Move(
+                    solitaire.spider.model.Move.Type.EXTRACT_RUN,
+                    i, -1, 13,
+                    new java.util.ArrayList<>(extracted)
+            ));
         }
     }
 

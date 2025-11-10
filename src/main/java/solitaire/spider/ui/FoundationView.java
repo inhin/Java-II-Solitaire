@@ -5,7 +5,7 @@
 // Author: Indy Hinton
 // Course: CPT-237-W38 Java Programming II
 // Semester: Fall 2025
-// Dates: 10/22/2025–11/2/2025
+// Dates: 10/22/2025–11/9/2025
 //
 // Description:
 // Visual representation of the Spider foundation area
@@ -35,6 +35,7 @@ public class FoundationView extends VBox {
         setMinWidth(90);
         setPrefWidth(90);
         setMaxWidth(90);
+        setStyle("-fx-background-color: transparent;"); // Updated to match green background
 
         refresh();
     }
@@ -43,22 +44,35 @@ public class FoundationView extends VBox {
         getChildren().clear();
 
         Label title = new Label(label);
-        title.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
+        title.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 11px;");
         getChildren().add(title);
 
         if (pile.getCards().isEmpty()) {
             StackPane slot = Basics.card(" ");
+            slot.setMinSize(64, 90);
+            slot.setMaxSize(64, 90);
             slot.setStyle("""
-                -fx-background-color: linear-gradient(#f7f7f7,#f0f0f0);
-                -fx-border-color: #cfcfcf;
-                -fx-background-radius: 6; -fx-border-radius: 6;
-                -fx-opacity: 0.9;
+                -fx-background-color: transparent;
+                -fx-border-color: rgba(255,255,255,0.25);
+                -fx-border-radius: 8;
             """);
             getChildren().add(slot);
         } else {
             StackPane card = Basics.card("✓");
-            ((Label)card.getChildren().get(0)).setStyle("-fx-font-weight: 700; -fx-font-size: 18px; -fx-text-fill: #22863a;");
+            card.setStyle("""
+                -fx-background-color: white;
+                -fx-border-color: #b5b5b5;
+                -fx-background-radius: 8; -fx-border-radius: 8;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+            """);
+            ((Label) card.getChildren().get(0))
+                    .setStyle("-fx-font-weight: 700; -fx-font-size: 18px; -fx-text-fill: #22863a;");
             getChildren().add(card);
+
+            // Show how many cards are in foundation
+            Label count = new Label(pile.getCards().size() + " cards");
+            count.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 10px;");
+            getChildren().add(count);
         }
     }
 }

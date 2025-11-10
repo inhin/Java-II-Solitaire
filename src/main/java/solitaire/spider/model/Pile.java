@@ -29,9 +29,6 @@ public class Pile {
     public Pile(PileType type) { this.type = type; }
 
 
-    public PileType getType() { return type; }
-
-
     public List<Card> getCards() { return cards; }
 
 
@@ -47,28 +44,33 @@ public class Pile {
     public Card pop() { return isEmpty() ? null : cards.remove(cards.size() - 1); }
 
 
-    // Returns a view of the top N cards (not removed)
-    // Player must ensure N <= size
-    public List<Card> topRun(int count) { return cards.subList(cards.size() - count, cards.size()); }
-
-
     // Remove the top N cards
-    // Return as a list in original order
+    // Return in correct order
     public List<Card> takeTop(int count) {
-        int start = cards.size() - count;
-        List<Card> slice = new ArrayList<>(cards.subList(start, cards.size()));
-        cards.subList(start, cards.size()).clear();
-        return slice;
+        List<Card> out = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            Card c = pop();
+            out.add(0, c);
+        }
+        return out;
     }
 
 
     // Add a run in order
-    public void addRun(List<Card> run) { cards.addAll(run); }
+    // Add to the foundations
+    public void addRun(List<Card> run) {
+        if (type == PileType.FOUNDATION) {
+            cards.addAll(run);
+            return;
+        }
+
+        cards.addAll(run);
+    }
 
 
     // Flip top card face up if needed
     public void flipTopUpIfNeeded() {
-        if (!isEmpty()) {
+        if (type == PileType.TABLEAU && !cards.isEmpty()) {
             Card t = top();
             if (!t.isFaceUp()) t.setFaceUp(true);
         }

@@ -5,7 +5,7 @@
 // Author: Indy Hinton
 // Course: CPT-237-W38 Java Programming II
 // Semester: Fall 2025
-// Dates: 10/22/2025–11/2/2025
+// Dates: 10/22/2025–11/9/2025
 //
 // Description:
 // Builds the layout of the Spider game board
@@ -30,46 +30,50 @@ public class SpiderBoardFactory {
     // List parameter
     public static Pane build(SpiderGame game,
                              List<PileView> outPileViews,
-                             List<FoundationView> outFoundationViews) {
+                             List<FoundationView> outFoundationViews,
+                             List<StockView> outStockViews) {
 
-        // Foundations row
-        HBox foundationsRow = new HBox(12);
-        foundationsRow.setPadding(new Insets(12, 32, 0, 32));
+        // Top Row
+        HBox topRow = new HBox(12);
+        topRow.setPadding(new Insets(12, 32, 0, 32));
+        topRow.setStyle("-fx-background-color: transparent;");
+
+        // Stock
+        StockView stockView = new StockView(game.stock);
+        outStockViews.add(stockView);
+        topRow.getChildren().add(stockView);
+
+        // Foundation
         for (int i = 0; i < SpiderGame.FOUNDATION_COUNT; i++) {
             FoundationView fv = new FoundationView(game.foundations.get(i), "F" + (i + 1));
             outFoundationViews.add(fv);
-            foundationsRow.getChildren().add(fv);
+            topRow.getChildren().add(fv);
         }
 
         // Tableau grid
         // Fixed widths so all 10 columns show
         // Will update to flexible
         GridPane gp = new GridPane();
-        double colW = 90, hgap = 18;
-        gp.setHgap(hgap);
-        gp.setVgap(0);
+        gp.setHgap(18);
         gp.setPadding(new Insets(12, 32, 16, 32));
-
-        for (int i = 0; i < 10; i++) {
-            ColumnConstraints cc = new ColumnConstraints();
-            cc.setMinWidth(colW);
-            cc.setPrefWidth(colW);
-            cc.setMaxWidth(Region.USE_PREF_SIZE);
-            gp.getColumnConstraints().add(cc);
-        }
-        double prefW = (colW * 10) + (hgap * 9) + gp.getPadding().getLeft() + gp.getPadding().getRight();
-        gp.setPrefWidth(prefW);
+        gp.setStyle("-fx-background-color: transparent;");
 
         for (int col = 0; col < SpiderGame.TABLEAU_COUNT; col++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setMinWidth(90);
+            cc.setPrefWidth(90);
+            gp.getColumnConstraints().add(cc);
+
             PileView pv = new PileView(game.tableaux.get(col), "S" + (col + 1));
             outPileViews.add(pv);
             gp.add(pv, col, 0);
         }
 
         BorderPane root = new BorderPane();
-        root.setTop(foundationsRow);
+        root.setTop(topRow);
         root.setCenter(gp);
+        root.setStyle("-fx-background-color: transparent;");
 
-        return Basics.wrap(root);
+        return root;
     }
 }

@@ -5,7 +5,7 @@
 // Author: Indy Hinton
 // Course: CPT-237-W38 Java Programming II
 // Semester: Fall 2025
-// Dates: 10/22/2025–11/2/2025
+// Dates: 10/22/2025–11/9/2025
 //
 // Description:
 // Application shell using BorderPane with:
@@ -55,7 +55,7 @@ public class SolitairePrototype extends Application {
 
         // Root layout
         root = new BorderPane();
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #eef2f7, #e5ebf3);"); // Subtle background
+        root.setStyle("-fx-background-color: #325b3b;"); // Updated 11-9-25 to green "felt" background
         root.setTop(top);
         root.setCenter(board);
         root.setBottom(status);

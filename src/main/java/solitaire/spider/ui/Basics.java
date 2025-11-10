@@ -57,20 +57,22 @@ public class Basics {
         return pile;
     }
 
+    // Updated 11-9-25 to look more like real cards
     public static StackPane card(String text) {
         StackPane c = new StackPane();
-        c.setMinSize(64, 86);
-        c.setMaxSize(64, 86);
+        c.setMinSize(64, 90);
+        c.setMaxSize(64, 90);
+        c.setPrefSize(64, 90);
         c.setStyle("""
             -fx-background-color: white;
-            -fx-border-color: #bbb;
-            -fx-background-radius: 6;
-            -fx-border-radius: 6;
+            -fx-border-color: #b5b5b5;
+            -fx-background-radius: 8;
+            -fx-border-radius: 8;
             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
         """);
-        Label lbl = new Label(text);
-        lbl.setStyle("-fx-font-size: 15px; -fx-font-weight: 700;");
-        c.getChildren().add(lbl);
+        Label center = new Label(text);
+        center.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #222;");
+        c.getChildren().add(center);
         return c;
     }
 
