@@ -76,7 +76,7 @@ public class StockView extends VBox {
             -fx-background-radius: 8; -fx-border-radius: 8;
             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 2);
         """);
-        Label dots = new Label("🂠");
+        Label dots = new Label("🕷");
         dots.setStyle("-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 20px;");
         back.getChildren().add(dots);
         return back;

@@ -15,6 +15,7 @@
 // - Playable Pyramid (Deal/Undo, win, HUD, timer)
 // - Exit confirmation + Rules/Hints menus
 //*********************************************
+// On 11/19/25, added events so Spider can call onMove, onScore, and onWin
 
 // JavaFX core classes
 import javafx.application.Application;
@@ -30,6 +31,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+import solitaire.core.GameEvents;
+import solitaire.core.Theme;
+import solitaire.core.ThemeManager;
+
 // Spider
 import solitaire.spider.ui.SpiderController;
 import solitaire.spider.ui.Basics;
@@ -41,16 +46,13 @@ import solitaire.klondike.ui.FoundationView;
 import solitaire.klondike.ui.KlondikeBoardFactory;
 
 // ---------- tiny callback contracts ----------
-interface GameEvents {
-    default void onMove() {}
-    default void onScore(int delta) {}
-    default void onWin() {}
-    default void onReset() {}
-}
+// GameEvents now in solitaire.core.GameEvents
+
 interface BoardActions {
     void deal();
     void undo();
 }
+
 
 final class BoardHandle {
     final javafx.scene.Node view;
@@ -73,6 +75,10 @@ public class SolitairePrototype extends Application {
     private int score = 0;
     private javafx.animation.Timeline timer;
     private int elapsedSec = 0;
+
+    // Updated 11/20/25: Total stats for attempt count
+    private int totalGames = 0;
+    private int totalWins = 0;
 
     // Variant picker + center board
     private final ComboBox<String> cboVariant = new ComboBox<>();
@@ -112,6 +118,7 @@ public class SolitairePrototype extends Application {
     }
 
     // ---------- Menu bar ----------
+    // Updated 11/20/25: themes
     private MenuBar buildMenuBar(BorderPane root) {
         Menu mGame = new Menu("Game");
         MenuItem miNew   = new MenuItem("New Game");
@@ -136,17 +143,44 @@ public class SolitairePrototype extends Application {
         });
         mGame.getItems().addAll(miNew, miReset, new SeparatorMenuItem(), miExit);
 
+        // Updated 12/2/25: Spider Hints
         Menu mView = new Menu("View");
-        MenuItem hintsItem = new MenuItem("Hints");
-        hintsItem.setOnAction(e -> showTextFileInDialog("Hints", alertFNF));
-        mView.getItems().add(hintsItem);
+        MenuItem klondikeHints = new MenuItem("Klondike Hints");
+        MenuItem spiderHints = new MenuItem("Spider Hints");
+        MenuItem pyramidHints = new MenuItem("Pyramid Hints");
 
+        spiderHints.setOnAction(e -> showTextFileInDialog("SpiderHints.txt", alertFNF));
+        klondikeHints.setOnAction(e -> showTextFileInDialog("Hints", alertFNF)); // Teammates add file here
+        pyramidHints.setOnAction(e -> showTextFileInDialog("Hints", alertFNF)); // Teammates add file here
+
+        mView.getItems().addAll(spiderHints, klondikeHints, pyramidHints);
+
+        // Updated 12/2/25: Spider Rules
         Menu mHelp = new Menu("Help");
-        MenuItem rulesItem = new MenuItem("Rules");
-        rulesItem.setOnAction(e -> showTextFileInDialog("Rules", alertFNF));
-        mHelp.getItems().add(rulesItem);
+        MenuItem klondikeRules = new MenuItem("Klondike Rules");
+        MenuItem spiderRules = new MenuItem("Spider Rules");
+        MenuItem pyramidRules = new MenuItem("Pyramid Rules");
 
-        return new MenuBar(mGame, mView, mHelp);
+        spiderRules.setOnAction(e -> showTextFileInDialog("SpiderRules.txt", alertFNF));
+        klondikeRules.setOnAction(e -> showTextFileInDialog("Rules", alertFNF)); // Teammates add file here
+        pyramidRules.setOnAction(e -> showTextFileInDialog("Rules", alertFNF)); // Teammates add file here
+
+        mHelp.getItems().addAll(spiderRules, klondikeRules, pyramidRules);
+
+        // Themes for all variants
+        Menu mThemes = new Menu("Themes");
+
+        MenuItem miClassic = new MenuItem("Classic");
+        MenuItem miOcean = new MenuItem("Ocean");
+        MenuItem miDark = new MenuItem("Dark Mode");
+
+        miClassic.setOnAction(e -> { ThemeManager.setTheme(Theme.CLASSIC); rebuildBoard(cboVariant.getValue(), root); });
+        miOcean.setOnAction(e -> { ThemeManager.setTheme(Theme.OCEAN); rebuildBoard(cboVariant.getValue(), root); });
+        miDark.setOnAction(e -> { ThemeManager.setTheme(Theme.DARK); rebuildBoard(cboVariant.getValue(), root); });
+
+        mThemes.getItems().addAll(miClassic, miOcean, miDark);
+
+        return new MenuBar(mGame, mView, mHelp, mThemes);
     }
 
     private void showTextFileInDialog(String fileName, Alert alertFNF) {
@@ -250,6 +284,7 @@ public class SolitairePrototype extends Application {
     private BoardHandle rebuildBoard(String variant, BorderPane root) {
         resetHud();
         startTimer();
+        totalGames++; // Added count new attempt on 11/20/25
 
         GameEvents events = new GameEvents() {
             @Override public void onMove() {
@@ -260,29 +295,61 @@ public class SolitairePrototype extends Application {
                 score += delta;
                 lblScore.setText("Score: " + score);
             }
-            @Override public void onWin() {
-                if (timer != null) timer.stop();
-                Alert a = new Alert(Alert.AlertType.INFORMATION,
-                        "You cleared the pyramid!\n" +
-                                "Moves: " + moves + "\n" +
-                                lblTime.getText());
-                a.setHeaderText("You Win!");
-                a.showAndWait();
+
+            // Updated 11/20/25: include all variants, attempts, play again option
+            @Override
+            public void onWin() {
+                javafx.application.Platform.runLater(() -> {
+
+                    if (timer != null) timer.stop();
+                    totalWins++;
+
+                    String message = String.format(
+                            "%s complete!\n\n" +
+                                    "Score: %d\n" +
+                                    "Moves: %d\n" +
+                                    "%s\n\n" +
+                                    "Wins: %d / %d games",
+                            variant,
+                            score,
+                            moves,
+                            lblTime.getText(),
+                            totalWins,
+                            totalGames
+                    );
+
+                    // Updated 12/2/25: Play Again and End Game Buttons
+                    Alert a = new Alert(Alert.AlertType.CONFIRMATION, message);
+                    a.setHeaderText("You Win!");
+                    a.setTitle("Game Complete");
+                    ButtonType playAgain = new ButtonType("Play Again?");
+                    ButtonType endGame   = new ButtonType("End Game");
+
+                    a.getButtonTypes().setAll(playAgain, endGame);
+
+                    Optional<ButtonType> result = a.showAndWait();
+                    if (result.isPresent() && result.get() == playAgain) {
+                        BoardHandle newHandle = rebuildBoard(variant, root);
+                        actions = newHandle.actions;
+                    }
+
+                });
             }
+
             @Override public void onReset() {
                 resetHud();
             }
         };
 
         // Pick the game board
+        // Updated 11/19/25 to call move, score, and win to Spider
         BoardHandle handle = switch (variant) {
             case "Spider" -> {
-                SpiderController spider = new SpiderController();
-                currentSpider = spider;
-                var spiderBoard = spider.createSpiderBoard();
+                currentSpider = new SpiderController(events);
+                var spiderBoard = currentSpider.createSpiderBoard();
                 yield new BoardHandle(spiderBoard, new BoardActions() {
-                    @Override public void deal() { spider.onDeal(); }
-                    @Override public void undo() { spider.onUndo(); }
+                    @Override public void deal() { currentSpider.onDeal(); }
+                    @Override public void undo() { currentSpider.onUndo(); }
                 });
             }
 

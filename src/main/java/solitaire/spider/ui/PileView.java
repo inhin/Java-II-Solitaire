@@ -22,10 +22,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import solitaire.spider.model.Card;
 import solitaire.spider.model.Pile;
+import solitaire.core.ThemeManager;
+import java.util.function.IntConsumer;
 
 public class PileView extends VBox {
     private final Pile pile;
     private final String label;
+    public IntConsumer onCardClicked;
+
 
     public PileView(Pile pile, String label) {
         this.pile = pile;
@@ -50,12 +54,21 @@ public class PileView extends VBox {
         getChildren().add(title);
 
         // draw cards
+        // Updated 12/1/25: Fixed highlight to selected card, not just bottom?
         for (int i = 0; i < pile.getCards().size(); i++) {
+            final int cardIndex = i;
             Card c = pile.getCards().get(i);
+
             StackPane cardNode = cardNodeFor(c);
-            cardNode.setTranslateY(i * -10);  // overlap
+            cardNode.setTranslateY(i * -10);
+
+            cardNode.setOnMouseClicked(e ->
+                    onCardClicked.accept(cardIndex)
+            );
+
             getChildren().add(cardNode);
         }
+
 
         // Empty pile placeholder
         // Updated 11-9-25 to match green background
@@ -90,7 +103,7 @@ public class PileView extends VBox {
             -fx-background-radius: 8; -fx-border-radius: 8;
             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 2);
         """);
-        Label dots = new Label("🂠");
+        Label dots = new Label("🕷");
         dots.setStyle("-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 20px;");
         back.getChildren().add(dots);
         return back;
@@ -100,53 +113,52 @@ public class PileView extends VBox {
         String rank = rankToText(c.getRank());
         String suit = suitToSymbol(c);
 
-        boolean red = (c.getSuit().name().equals("HEARTS") || c.getSuit().name().equals("DIAMONDS"));
-        String color = red ? "#c03232" : "#222";
-
         StackPane root = new StackPane();
         root.setMinSize(64, 90);
         root.setMaxSize(64, 90);
-        root.setStyle("""
-            -fx-background-color: white;
-            -fx-border-color: #b5b5b5;
-            -fx-background-radius: 8; -fx-border-radius: 8;
-            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
-        """);
 
-        // top-left corner
-        VBox tl = new VBox(
-                new Label(rank),
-                new Label(suit)
-        );
+        // Themed card face style
+        ThemeManager.styleCardFace(root);
+
+        boolean isRed = (c.getSuit().name().equals("HEARTS") ||
+                c.getSuit().name().equals("DIAMONDS"));
+
+        // --- Top left ---
+        Label tlRank = new Label(rank);
+        solitaire.core.ThemeManager.styleCardText(tlRank, isRed);
+        VBox tl = new VBox(tlRank);
         tl.setSpacing(-2);
         tl.setTranslateX(6);
         tl.setTranslateY(6);
-        tl.getChildren().forEach(n ->
-                ((Label) n).setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px; -fx-font-weight: bold;")
-        );
+        StackPane.setAlignment(tl, Pos.TOP_LEFT);
 
-        // bottom-right corner (rotated)
-        VBox br = new VBox(
-                new Label(rank),
-                new Label(suit)
-        );
+        // --- Bottom right ---
+        Label brRank = new Label(rank);
+        solitaire.core.ThemeManager.styleCardText(brRank, isRed);
+        VBox br = new VBox(brRank);
         br.setSpacing(-2);
         br.setRotate(180);
         br.setTranslateX(-6);
         br.setTranslateY(-6);
-        br.getChildren().forEach(n ->
-                ((Label) n).setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px; -fx-font-weight: bold;")
-        );
-
-        // center suit
-        Label center = new Label(suit);
-        center.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 20px; -fx-font-weight: bold;");
-
-        root.getChildren().addAll(center, tl, br);
-        StackPane.setAlignment(tl, Pos.TOP_LEFT);
         StackPane.setAlignment(br, Pos.BOTTOM_RIGHT);
 
+        // --- Center ---
+        Label center = new Label(suit);
+        solitaire.core.ThemeManager.styleCardText(center, isRed);
+
+        root.getChildren().addAll(center, tl, br);
         return root;
+    }
+
+    // The top (visible) card node or null if empty
+    public StackPane getTopCardNode() {
+        if (pile.getCards().isEmpty()) return null;
+        // children: [0] = title label, then cards/slot
+        var last = getChildren().get(getChildren().size() - 1);
+        if (last instanceof StackPane sp) {
+            return sp;
+        }
+        return null;
     }
 
     private String rankToText(int r) {

@@ -24,19 +24,24 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.control.Label;
 
 
 import solitaire.spider.engine.SpiderGame;
 import solitaire.spider.model.Card;
+import solitaire.core.GameEvents;
+import solitaire.core.ThemeManager;
 
 public class SpiderController {
-    private final SpiderGame game = new SpiderGame();
+    private SpiderGame game = new SpiderGame();
     private final List<PileView> pileViews = new ArrayList<>();
     private final List<FoundationView> foundationViews = new ArrayList<>();
     private final List<StockView> stockViews = new ArrayList<>();
     private final Pane overlay = new Pane();
     private StackPane boardRoot;
     private boolean animating = false;
+    private final GameEvents events;
+    private StackPane selectedCardNode = null;
 
     public javafx.scene.Node createSpiderBoard() {
         pileViews.clear();
@@ -50,7 +55,7 @@ public class SpiderController {
         // Stack overlay on top for animations
         Pane board = SpiderBoardFactory.build(game, pileViews, foundationViews, stockViews);
         boardRoot = new StackPane(board, overlay);
-        boardRoot.setStyle("-fx-background-color: transparent;");
+        ThemeManager.applyBackground(boardRoot);
 
         // Add scroll bars
         // Temporary solution until flexible is solved
@@ -68,18 +73,45 @@ public class SpiderController {
     }
 
     public void onNewGame() {
-        game.newGame();
+        game = new SpiderGame();
         refreshAll();
+        events.onReset();
     }
 
+    // Updated 11/19/25 to connect move and score to HUD
     public boolean onDeal() {
-        boolean ok = game.dealRow();
-        if (ok) {
-            game.extractCompletedRuns();
-            refreshAll();
-            if (game.isWin()) showWin();
+        // Check for empty tableau column
+        boolean hasEmpty = game.tableaux.stream().anyMatch(p -> p.isEmpty());
+        if (hasEmpty) {
+            new Alert(Alert.AlertType.WARNING,
+                    "You cannot deal when a tableau column is empty!")
+                    .showAndWait();
+            return false;
         }
-        return ok;
+
+        // Attempt to deal
+        boolean ok = game.dealRow();
+        if (!ok) {
+            new Alert(Alert.AlertType.WARNING,
+                    "No more deals available!")
+                    .showAndWait();
+            return false;
+        }
+
+        game.extractCompletedRuns();
+        refreshAll();
+
+        if (events != null) {
+            events.onMove();
+            events.onScore(-1);
+        }
+
+        // Detect win after deal
+        if (game.isWin()) {
+            if (events != null) events.onWin();
+        }
+
+        return true;
     }
 
     public void onUndo() {
@@ -97,9 +129,6 @@ public class SpiderController {
         stockViews.forEach(StockView::refresh);
     }
 
-    private void showWin() {
-        new Alert(Alert.AlertType.INFORMATION, "You win!").showAndWait();
-    }
 
     // Click-select move wiring
     private Integer selectedFrom = null;
@@ -113,22 +142,37 @@ public class SpiderController {
 
     private void handleClick(int idx) {
         if (animating) return; // prevent actions during animation
+
+        // Select from pile
         if (selectedFrom == null) {
             selectedFrom = idx;
-            pileViews.get(idx).setStyle("""
-                -fx-background-color: transparent;
+
+            // Highlight only the top card in this pile
+            selectedCardNode = pileViews.get(idx).getTopCardNode();
+            if (selectedCardNode != null) {
+                String base = selectedCardNode.getStyle();
+                selectedCardNode.setStyle(base + """
                 -fx-border-color: gold;
                 -fx-border-width: 2;
             """);
+            }
             return;
         }
 
-        // Updated setStyle to show green background after moving cards
+        // Attempt move TO this pile
         tryMoveLongestRun(selectedFrom, idx);
-        pileViews.get(selectedFrom).setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+
+        // Clear highlight
+        if (selectedFrom >= 0 && selectedFrom < pileViews.size()) {
+            pileViews.get(selectedFrom).refresh();
+        }
         selectedFrom = null;
+        selectedCardNode = null;
+
         refreshAll();
-        if (game.isWin()) showWin();
+        if (game.isWin()) {
+            if (events != null) events.onWin();
+        }
     }
 
     private void tryMoveLongestRun(int fromIdx, int toIdx) {
@@ -157,14 +201,21 @@ public class SpiderController {
             if (game.moveRun(fromIdx, moveCount, toIdx)) {
                 game.undo(); // Test
 
+                // Updated 11/19/25 to record moves and score
                 animateMove(fromIdx, toIdx, cards, () -> {
                     game.moveRun(fromIdx, moveCount, toIdx);
                     game.extractCompletedRuns();
+                    if (events != null) {
+                        events.onMove();
+                        events.onScore(5);
+                    }
+
                     refreshAll();
                     animating = false;
-                    if (game.isWin()) showWin();
+                    if (game.isWin()) {
+                        if (events != null) events.onWin();
+                    }
                 });
-                return;
             }
         }
     }
@@ -189,12 +240,12 @@ public class SpiderController {
                 text = r + s;
             }
             var node = Basics.card(text);
-            node.setTranslateY(i * -12);
-            if (c.isFaceUp() && (c.getSuit().name().equals("HEARTS") || c.getSuit().name().equals("DIAMONDS"))) {
-                ((javafx.scene.control.Label) node.getChildren().get(0)).setStyle("-fx-text-fill:#c03232; -fx-font-weight:700; -fx-font-size:15px;");
-            } else {
-                ((javafx.scene.control.Label) node.getChildren().get(0)).setStyle("-fx-text-fill:#222; -fx-font-weight:700; -fx-font-size:15px;");
-            }
+
+            // Theme-based text color
+            boolean isRed = (c.getSuit().name().equals("HEARTS") ||
+                    c.getSuit().name().equals("DIAMONDS"));
+            ThemeManager.styleCardText((Label) node.getChildren().get(0), isRed);
+
             box.getChildren().add(node);
         }
         return box;
@@ -232,5 +283,10 @@ public class SpiderController {
             onFinished.run();
         });
         pt.play();
+    }
+
+    public SpiderController(GameEvents events) {
+        this.events = events;
+        this.game = new SpiderGame();
     }
 }

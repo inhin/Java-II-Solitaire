@@ -51,7 +51,7 @@ public class SpiderGame {
     // Count/score metrics
     // Will adjust more later as suits are added
     private int moveCount = 0;
-    private int score = 500;
+    private int score = 0;
 
     // New Game
     // Base 1-suit Spider table
@@ -89,7 +89,7 @@ public class SpiderGame {
 
         // Remaining cards go to stock
         for (Card c : deck) stock.push(c);
-        moveCount = 0; score = 500;
+        moveCount = 0; score = 0;
     }
 
 

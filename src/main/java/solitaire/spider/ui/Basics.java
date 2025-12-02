@@ -24,6 +24,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import solitaire.core.ThemeManager;
+
 public class Basics {
     public static GridPane grid(int cols) {
         GridPane gp = new GridPane();
@@ -58,20 +60,27 @@ public class Basics {
     }
 
     // Updated 11-9-25 to look more like real cards
+    // Updated 11-20-25 to support theme-based card styling
     public static StackPane card(String text) {
         StackPane c = new StackPane();
         c.setMinSize(64, 90);
         c.setMaxSize(64, 90);
         c.setPrefSize(64, 90);
         c.setStyle("""
-            -fx-background-color: white;
-            -fx-border-color: #b5b5b5;
-            -fx-background-radius: 8;
-            -fx-border-radius: 8;
-            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
-        """);
+        -fx-background-color: white;
+        -fx-border-color: #b5b5b5;
+        -fx-background-radius: 8;
+        -fx-border-radius: 8;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    """);
+
         Label center = new Label(text);
-        center.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #222;");
+        center.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        // Themed text color
+        boolean isRed = text.contains("♥") || text.contains("♦");
+        solitaire.core.ThemeManager.styleCardText(center, isRed);
+
         c.getChildren().add(center);
         return c;
     }
