@@ -69,9 +69,15 @@ public class Basics {
             -fx-border-radius: 6;
             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
         """);
-        Label lbl = new Label(text);
-        lbl.setStyle("-fx-font-size: 15px; -fx-font-weight: 700;");
-        c.getChildren().add(lbl);
+
+        Label center = new Label(text);
+        center.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        // Themed text color
+        boolean isRed = text.contains("♥") || text.contains("♦");
+        solitaire.core.ThemeManager.styleCardText(center, isRed);
+
+        c.getChildren().add(center);
         return c;
     }
 

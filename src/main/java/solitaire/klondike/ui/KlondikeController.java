@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import solitaire.klondike.engine.KlondikeGame;
+import solitaire.core.ThemeManager;
 
 public class KlondikeController {
 
@@ -46,6 +47,8 @@ public class KlondikeController {
         Pane board = KlondikeBoardFactory.build(game, pileViews, foundationViews);
 
         boardRoot = new StackPane(board);
+        ThemeManager.applyBackground(boardRoot);
+
 
         // Scrolling
         ScrollPane scrollPane = new ScrollPane(boardRoot);
