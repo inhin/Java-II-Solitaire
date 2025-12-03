@@ -49,10 +49,6 @@ public class PileView extends VBox {
     public void refresh() {
         getChildren().clear();
 
-        Label title = new Label(label);
-        title.setStyle("-fx-text-fill: #444; -fx-font-size: 11px;");
-        getChildren().add(title);
-
         // draw cards
         // Updated 12/1/25: Fixed highlight to selected card, not just bottom?
         for (int i = 0; i < pile.getCards().size(); i++) {

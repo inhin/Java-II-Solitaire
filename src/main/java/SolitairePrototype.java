@@ -446,8 +446,12 @@ class PyramidBoardFactory {
     public static BoardHandle build(GameEvents events) {
         events.onReset();
 
-        Pane root = new Pane();
-        root.setPrefSize(1000, 520);
+        Pane board = new Pane();
+        board.setPrefSize(1000, 520);
+
+        // Apply theme background
+        StackPane root = new StackPane(board);
+        ThemeManager.applyBackground(root);
 
         // Deck and deal
         List<CardModel> deck = freshDeck();
@@ -475,7 +479,7 @@ class PyramidBoardFactory {
                 CardView cv = py[r][c];
                 cv.setLayoutX(startX + c * dx);
                 cv.setLayoutY(topY + r * dy);
-                root.getChildren().add(cv);
+                board.getChildren().add(cv); // changed to board to get themes
             }
         }
 
@@ -631,7 +635,8 @@ class PyramidBoardFactory {
         });
 
         // Add nodes
-        root.getChildren().addAll(stockSlot, wasteSlot, lblStock, lblWaste);
+        // Changed to board to get themes
+        board.getChildren().addAll(stockSlot, wasteSlot, lblStock, lblWaste);
 
         // Actions (for toolbar)
         BoardActions actions = new BoardActions() {

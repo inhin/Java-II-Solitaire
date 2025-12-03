@@ -40,11 +40,6 @@ public class StockView extends VBox {
     public void refresh() {
         getChildren().clear();
 
-        // label
-        Label title = new Label("Stock");
-        title.setStyle("-fx-text-fill: #444; -fx-font-size: 11px;");
-        getChildren().add(title);
-
         // Show face-down cards if left
         if (!stock.getCards().isEmpty()) {
             StackPane back = faceDownCard();

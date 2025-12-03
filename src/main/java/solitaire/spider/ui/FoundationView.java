@@ -43,10 +43,6 @@ public class FoundationView extends VBox {
     public void refresh() {
         getChildren().clear();
 
-        Label title = new Label(label);
-        title.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 11px;");
-        getChildren().add(title);
-
         if (pile.getCards().isEmpty()) {
             StackPane slot = Basics.card(" ");
             slot.setMinSize(64, 90);
