@@ -17,7 +17,7 @@ public class ThemeManager {
         return current;
     }
 
-    public static void applyBackground(StackPane boardRoot) {
+    public static void applyBackground(Region boardRoot) {
         if (boardRoot == null) return;
 
         String style = switch (current) {
@@ -28,10 +28,12 @@ public class ThemeManager {
 
         boardRoot.setStyle(style);
 
-        if (boardRoot.getParent() instanceof Pane parentPane) {
-            parentPane.setStyle(style);
-        } else if (boardRoot.getParent() instanceof Region parentRegion) {
-            parentRegion.setStyle(style);
+        javafx.scene.Parent parent = boardRoot.getParent();
+        while (parent != null) {
+            if (parent instanceof Region r) {
+                r.setStyle(style);
+            }
+            parent = parent.getParent();
         }
     }
 

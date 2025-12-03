@@ -50,4 +50,3 @@ public class Card {
         return names[rank] + " of " + suit;
     }
 }
-

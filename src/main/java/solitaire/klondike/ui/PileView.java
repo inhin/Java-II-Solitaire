@@ -24,6 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import solitaire.klondike.model.Card;
 import solitaire.klondike.model.Pile;
+import solitaire.core.ThemeManager;
 
 public class PileView extends VBox {
     private final Pile pile;
@@ -76,6 +77,16 @@ public class PileView extends VBox {
         }
         String text = rankToText(c.getRank()) + suitToSymbol(c);
         StackPane face = Basics.card(text);
+
+        // Theme face styling
+        ThemeManager.styleCardFace(face);
+
+        // Theme text styling
+        Label lbl = (Label) face.getChildren().get(0);
+
+        boolean isRed = text.contains("♥") || text.contains("♦");
+        ThemeManager.styleCardText(lbl, isRed);
+
         return face;
     }
 
@@ -98,4 +109,3 @@ public class PileView extends VBox {
         };
     }
 }
-

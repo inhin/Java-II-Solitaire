@@ -16,6 +16,7 @@ package solitaire.klondike.ui;
 //*********************************************
 
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import solitaire.klondike.engine.KlondikeGame;
-import solitaire.core.ThemeManager;
 
 public class KlondikeController {
 
@@ -37,29 +37,36 @@ public class KlondikeController {
     private StackPane boardRoot;
 
     public Node createKlondikeBoard() {
-        pileViews.clear();
-        foundationViews.clear();
+        try {
+            pileViews.clear();
+            foundationViews.clear();
 
-        // Start a new Klondike game
-        game.newGame();
+            // Start a new Klondike game
+            game.newGame();
 
-        // build the board
-        Pane board = KlondikeBoardFactory.build(game, pileViews, foundationViews);
+            // Build the board
+            Pane board = KlondikeBoardFactory.build(game, pileViews, foundationViews);
 
-        boardRoot = new StackPane(board);
-        ThemeManager.applyBackground(boardRoot);
+            boardRoot = new StackPane(board);
+            boardRoot.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
+            // Scrolling
+            ScrollPane scrollPane = new ScrollPane(boardRoot);
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(true);
+            scrollPane.setPannable(true);
 
-        // Scrolling
-        ScrollPane scrollPane = new ScrollPane(boardRoot);
-        scrollPane.setFitToWidth(false);
-        scrollPane.setFitToHeight(false);
-        scrollPane.setPannable(true);
+            refreshAll();
 
-        refreshAll();
+            return scrollPane;
 
-        return scrollPane;
+        } catch (Exception ex) {
+            System.out.println("KLONDIKE CRASHED:");
+            ex.printStackTrace();
+            return new Label("KLONDIKE FAILED TO LOAD");
+        }
     }
+
 
     // Start a new game
     public void onNewGame() {

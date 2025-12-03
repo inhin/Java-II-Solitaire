@@ -150,7 +150,8 @@ public class SolitairePrototype extends Application {
         MenuItem pyramidHints = new MenuItem("Pyramid Hints");
 
         spiderHints.setOnAction(e -> showTextFileInDialog("SpiderHints.txt", alertFNF));
-        klondikeHints.setOnAction(e -> showTextFileInDialog("KlondikeHints.txt", alertFNF));
+        klondikeHints.setOnAction(e -> showTextFileInDialog("KlondikeHints.txt" +
+                "", alertFNF));
         pyramidHints.setOnAction(e -> showTextFileInDialog("Hints", alertFNF)); // Teammates add file here
 
         mView.getItems().addAll(spiderHints, klondikeHints, pyramidHints);
@@ -376,7 +377,7 @@ public class SolitairePrototype extends Application {
             }
 
             case "Klondike" -> {
-                currentSpider = null;   // not a spider game
+                currentSpider = null;
                 var k = new solitaire.klondike.ui.KlondikeController();
                 var view = k.createKlondikeBoard();
                 yield new BoardHandle(view, new BoardActions() {
@@ -397,9 +398,22 @@ public class SolitairePrototype extends Application {
         };
 
         // Apply to UI
+        BorderPane.setAlignment(handle.view, Pos.CENTER);
+        BorderPane.setMargin(handle.view, new Insets(0));
         root.setCenter(handle.view);
+
         board   = handle.view;
         actions = handle.actions;
+
+        // Force theme to apply to CENTER AREA, not inside ScrollPane content
+        if (handle.view instanceof ScrollPane sp) {
+            if (sp.getContent() instanceof javafx.scene.layout.Region r) {
+                ThemeManager.applyBackground(r);
+            }
+        } else if (handle.view instanceof javafx.scene.layout.Region r) {
+            ThemeManager.applyBackground(r);
+        }
+
 
         // Sync HUD with Spider stats
         if (currentSpider != null) {
@@ -439,15 +453,15 @@ class PyramidBoardFactory {
             this.model = m;
             setMinSize(64, 86);
             setMaxSize(64, 86);
-            setStyle("""
-                -fx-background-color: linear-gradient(#ffffff, #f3f3f3);
-                -fx-border-color: #888;
-                -fx-background-radius: 10;
-                -fx-border-radius: 10;
-                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0.3, 0, 3);
-            """);
+            ThemeManager.styleCardFace(this); // Apply theme card styling
+
             Label face = new Label(faceText(m));
             face.setFont(Font.font(16));
+
+            boolean isRed = face.getText().contains("♥") || face.getText().contains("♦");
+            ThemeManager.styleCardText(face, isRed);
+
+
             getChildren().add(face);
         }
 

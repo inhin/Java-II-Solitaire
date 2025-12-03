@@ -1,5 +1,5 @@
 //*********************************************
-// Spider Solitaire – Prototype 2
+// Solitaire – Prototype 2
 // File: GameRules.java
 //
 // Author: Indy Hinton

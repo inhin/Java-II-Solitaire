@@ -20,6 +20,7 @@ import javafx.geometry.Insets;
 import javafx.scene.layout.*;
 import javafx.scene.control.Label;
 import javafx.scene.Node;
+import solitaire.core.ThemeManager;
 import solitaire.klondike.engine.KlondikeGame;
 
 import java.util.List;
@@ -75,18 +76,22 @@ public class KlondikeBoardFactory {
         }
 
         // ---------- ROOT LAYOUT ----------
-        BorderPane root = new BorderPane();
-        root.setTop(topBar);
-        root.setCenter(gp);
+        BorderPane layout = new BorderPane();
+        layout.setTop(topBar);
+        layout.setCenter(gp);
 
-        return root;
+        layout.setPrefSize(1000, 650);
+        layout.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        return layout;
+
     }
 
-    // Placeholder, will update
+    // Placeholder
     private static Node makePlaceholder(String text) {
         StackPane box = new StackPane();
         box.setPrefSize(80, 110);
-        box.setStyle("-fx-border-color: #333; -fx-background-color: rgba(255,255,255,0.4); -fx-border-radius: 6;");
+        box.setStyle("-fx-border-color: #333; -fx-border-radius: 6;");
+
         Label lbl = new Label(text);
         box.getChildren().add(lbl);
         return box;
