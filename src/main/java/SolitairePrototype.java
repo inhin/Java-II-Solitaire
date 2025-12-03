@@ -4,7 +4,7 @@
 // Author: Indy Hinton, Danahryien Dendy, Jenascia Drew
 // Course: CPT-237-W38 Java Programming II
 // Semester: Fall 2025
-// Dates: 10/22/2025–11/11/2025
+// Dates: 10/22/2025–12/3/2025
 //
 // Description:
 // Application shell with:
@@ -150,7 +150,7 @@ public class SolitairePrototype extends Application {
         MenuItem pyramidHints = new MenuItem("Pyramid Hints");
 
         spiderHints.setOnAction(e -> showTextFileInDialog("SpiderHints.txt", alertFNF));
-        klondikeHints.setOnAction(e -> showTextFileInDialog("KlondikeHints", alertFNF));
+        klondikeHints.setOnAction(e -> showTextFileInDialog("KlondikeHints.txt", alertFNF));
         pyramidHints.setOnAction(e -> showTextFileInDialog("Hints", alertFNF)); // Teammates add file here
 
         mView.getItems().addAll(spiderHints, klondikeHints, pyramidHints);
@@ -162,10 +162,32 @@ public class SolitairePrototype extends Application {
         MenuItem pyramidRules = new MenuItem("Pyramid Rules");
 
         spiderRules.setOnAction(e -> showTextFileInDialog("SpiderRules.txt", alertFNF));
-        klondikeRules.setOnAction(e -> showTextFileInDialog("KlondikeRules", alertFNF));
+        klondikeRules.setOnAction(e -> showTextFileInDialog("KlondikeRules.txt", alertFNF));
         pyramidRules.setOnAction(e -> showTextFileInDialog("Rules", alertFNF)); // Teammates add file here
 
         mHelp.getItems().addAll(spiderRules, klondikeRules, pyramidRules);
+
+        // Contributors
+        Menu mAbout = new Menu("About");
+
+        MenuItem miContrib = new MenuItem("Contributors");
+        miContrib.setOnAction(e -> {
+            Alert a = new Alert(Alert.AlertType.INFORMATION);
+            a.setTitle("About – Solitaire Project");
+            a.setHeaderText("Solitaire Project");
+            a.setContentText("""
+            Created by:
+            
+              • Jenascia Drew (Klondike)
+              • Indy Hinton (Spider)
+              • Danahryien Dendy (Pyramid)
+            
+            Course: CPT-237-W38 – Java Programming II
+            """);
+            a.showAndWait();
+        });
+
+        mAbout.getItems().add(miContrib);
 
         // Themes for all variants
         Menu mThemes = new Menu("Themes");
@@ -180,7 +202,7 @@ public class SolitairePrototype extends Application {
 
         mThemes.getItems().addAll(miClassic, miOcean, miDark);
 
-        return new MenuBar(mGame, mView, mHelp, mThemes);
+        return new MenuBar(mGame, mView, mHelp, mThemes, mAbout);
     }
 
     private void showTextFileInDialog(String fileName, Alert alertFNF) {
