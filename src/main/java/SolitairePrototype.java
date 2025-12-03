@@ -418,11 +418,11 @@ class PyramidBoardFactory {
             setMinSize(64, 86);
             setMaxSize(64, 86);
             setStyle("""
-                -fx-background-color: white;
-                -fx-border-color: #bbb;
-                -fx-background-radius: 6;
-                -fx-border-radius: 6;
-                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+                -fx-background-color: linear-gradient(#ffffff, #f3f3f3);
+                -fx-border-color: #888;
+                -fx-background-radius: 10;
+                -fx-border-radius: 10;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0.3, 0, 3);
             """);
             Label face = new Label(faceText(m));
             face.setFont(Font.font(16));
@@ -435,11 +435,26 @@ class PyramidBoardFactory {
             return r + s;
         }
 
-        void setSelected(boolean on) {
+       void setSelected(boolean on) {
             selected = on;
-            setStyle( on
-                    ? "-fx-background-color: #e8f0fe; -fx-border-color: #3b6df6; -fx-background-radius: 6; -fx-border-radius: 6;"
-                    : "-fx-background-color: white; -fx-border-color: #bbb; -fx-background-radius: 6; -fx-border-radius: 6;");
+
+            if (on) {
+                setStyle("""
+            -fx-background-color: #e8f0fe;
+            -fx-border-color: #3b6df6;
+            -fx-background-radius: 10;
+            -fx-border-radius: 10;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0.3, 0, 3);
+        """);
+            } else {
+                setStyle("""
+            -fx-background-color: linear-gradient(#ffffff, #f3f3f3);
+            -fx-border-color: #888;
+            -fx-background-radius: 10;
+            -fx-border-radius: 10;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0.3, 0, 3);
+        """);
+            }
         }
     }
 
