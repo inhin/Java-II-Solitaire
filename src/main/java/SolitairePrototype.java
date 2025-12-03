@@ -150,7 +150,7 @@ public class SolitairePrototype extends Application {
         MenuItem pyramidHints = new MenuItem("Pyramid Hints");
 
         spiderHints.setOnAction(e -> showTextFileInDialog("SpiderHints.txt", alertFNF));
-        klondikeHints.setOnAction(e -> showTextFileInDialog("Hints", alertFNF)); // Teammates add file here
+        klondikeHints.setOnAction(e -> showTextFileInDialog("KlondikeHints", alertFNF));
         pyramidHints.setOnAction(e -> showTextFileInDialog("Hints", alertFNF)); // Teammates add file here
 
         mView.getItems().addAll(spiderHints, klondikeHints, pyramidHints);
@@ -162,7 +162,7 @@ public class SolitairePrototype extends Application {
         MenuItem pyramidRules = new MenuItem("Pyramid Rules");
 
         spiderRules.setOnAction(e -> showTextFileInDialog("SpiderRules.txt", alertFNF));
-        klondikeRules.setOnAction(e -> showTextFileInDialog("Rules", alertFNF)); // Teammates add file here
+        klondikeRules.setOnAction(e -> showTextFileInDialog("KlondikeRules", alertFNF));
         pyramidRules.setOnAction(e -> showTextFileInDialog("Rules", alertFNF)); // Teammates add file here
 
         mHelp.getItems().addAll(spiderRules, klondikeRules, pyramidRules);
