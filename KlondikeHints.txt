@@ -1,0 +1,64 @@
+Klondike Solitaire – Beginner Hints
+
+---------------------------------------
+GOAL
+---------------------------------------
+Your goal is to move all cards into completed stacks
+from King down to Ace. Each full stack is removed
+automatically when completed.
+
+---------------------------------------
+MOVING CARDS
+---------------------------------------
+• Cards must be stacked in descending order:
+  King → Queen → Jack → 10 → 9 → 8 → 7 → 6 → 5 → 4 → 3 → 2 → Ace
+
+• You can only move cards that are FACE UP
+
+• You may move a stack of cards if they:
+  - Are in order
+
+• You can place a card or stack onto another card
+  only IF the target card is ONE rank higher
+• You can place a card or stack onto another card
+  only IF the colors differ
+
+---------------------------------------
+DEALING CARDS
+---------------------------------------
+• You may only deal a new row when NO column is empty
+
+• Each deal places one random card onto each column
+
+• If a column is empty, fill it before you deal again
+
+---------------------------------------
+BEGINNER STRATEGY
+---------------------------------------
+✓ Reveal hidden cards early
+✓ Try to build LONG sequences
+✓ Use empty columns wisely
+✓ Plan before you deal
+✓ Move stacks instead of single cards when possible
+
+---------------------------------------
+COMMON MISTAKES
+---------------------------------------
+✗ Dealing too early
+✗ Blocking important cards
+✗ Ignoring empty columns
+✗ Breaking completed runs unnecessarily
+
+---------------------------------------
+WINNING TIPS
+---------------------------------------
+The strongest games come from:
+
+✔ Long card sequences
+✔ Smart use of empty columns
+✔ Delaying deal until ready
+✔ Finishing stacks when possible
+
+---------------------------------------
+Good luck and have fun! :)
+---------------------------------------

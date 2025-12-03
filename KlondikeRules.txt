@@ -1,0 +1,35 @@
+KLONDIKE SOLITAIRE RULES
+
+OBJECTIVE:
+Build complete descending sequences from King to Ace
+Each completed sequence is removed to the foundation
+
+MOVING CARDS:
+You may move a card or group of cards if:
+• All cards are face-up
+• Cards are in descending order
+• Cards are differ in color
+    - Ex: Red on Black OR Black on Red
+• The destination card is exactly one rank higher
+• An empty column may accept any valid sequence
+
+DEALING:
+•You may only deal a new row when:
+    - All tableau columns contain at least one card
+
+SCORING:
+• Valid move: +5
+• Deal row: -1
+• Completed run: (award controlled by engine)
+• Undo does not give points
+
+WIN CONDITION:
+You win when all 7 complete sequences have been moved to the foundation
+
+CONTROLS:
+• Click a column to select
+• Click another column to move the selected card to the second column
+• Use toolbar buttons for New Game, Deal, and Undo
+
+THEMES (Classic, Ocean, Dark):
+Themes may be changed using the menu at the top :)
